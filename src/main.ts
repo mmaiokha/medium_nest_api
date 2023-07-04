@@ -1,7 +1,6 @@
 if (process.env.IS_TS_NODE) {
   require('module-alias/register')
 }
-require('dotenv').config()
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
