@@ -1,27 +1,26 @@
 import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { UsersModule } from "./users/users.module";
-
 import typeormConfig from "@app/config/orm.config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { UsersModule } from "@app/users/users.module";
 import { JwtAuthMiddleware } from "@app/users/middlewares/jwtAuth.middleware";
-import { ArticlesModule } from './articles/articles.module';
+import { ArticlesModule } from "@app/articles/articles.module";
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeormConfig),
     UsersModule,
-    ArticlesModule,
+    ArticlesModule
   ],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtAuthMiddleware)
       .forRoutes({
-        path: '*',
+        path: "*",
         method: RequestMethod.ALL
-      })
+      });
   }
 }
