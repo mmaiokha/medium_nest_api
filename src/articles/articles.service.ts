@@ -10,6 +10,10 @@ import { UpdateArticleDto } from "@app/articles/dto/updateArticle.dto";
 import { ArticlesResponseInterface } from "@app/articles/interfaces/articlesResponse.interface";
 import { ArticlesFeedQueryDto } from "@app/articles/dto/articlesQuery.dto";
 import { FollowEntity } from "@app/profile/follow.entity";
+import { CommentResponseInterface } from "@app/articles/interfaces/commentResponse.interface";
+import { CreateCommentDto } from "@app/articles/dto/createComment.dto";
+import { CommentEntity } from "@app/articles/comments.entity";
+import { CommentsResponseInterface } from "@app/articles/interfaces/commentsResponse.interface";
 
 @Injectable()
 export class ArticlesService {
@@ -19,7 +23,9 @@ export class ArticlesService {
         @InjectRepository(UserEntity)
         private readonly usersRepository: Repository<UserEntity>,
         @InjectRepository(FollowEntity)
-        private readonly followRepository: Repository<FollowEntity>
+        private readonly followRepository: Repository<FollowEntity>,
+        @InjectRepository(CommentEntity)
+        private readonly commentRepository: Repository<CommentEntity>
     ) {
     }
 
@@ -225,5 +231,40 @@ export class ArticlesService {
         return slugify(title, { lower: true }) +
             "-" +
             (Math.random() * Math.pow(36, 6) | 0).toString(36);
+    }
+
+    async createComment(slug: string, currentUser: UserEntity, createCommentDto: CreateCommentDto): Promise<CommentEntity> {
+        const article = await this.getBySlug(slug);
+        const newComment = new CommentEntity();
+        Object.assign(newComment, createCommentDto);
+        newComment.author = currentUser;
+        newComment.article = article;
+        return await this.commentRepository.save(newComment);
+    }
+
+    async deleteComment(commentId, currentUserId): Promise<DeleteResult> {
+        const comment = await this.commentRepository.findOne({ where: { id: commentId }, relations: ["author"] });
+        if (!comment) {
+            throw new HttpException("Comment not found", HttpStatus.NOT_FOUND);
+        }
+        if (comment.author.id !== currentUserId) {
+            throw new HttpException("You are not an author of this comment", HttpStatus.FORBIDDEN);
+        }
+        return await this.commentRepository.delete({ id: commentId });
+    }
+
+    async getAllComments(slug: string): Promise<CommentsResponseInterface> {
+        const comments = await this.commentRepository.createQueryBuilder("comments")
+            .leftJoin("comments.article", "article")
+            .leftJoinAndSelect("comments.author", "author")
+            .andWhere("article.slug = :slug", { slug })
+            .getMany();
+        return { comments };
+    }
+
+    getCommentResponse(comment: CommentEntity): CommentResponseInterface {
+        delete comment.author.id;
+        delete comment.article;
+        return { comment };
     }
 }

@@ -5,10 +5,11 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ArticleEntity } from "@app/articles/articles.entity";
 import { UsersModule } from "@app/users/users.module";
 import { ProfileModule } from "@app/profile/profile.module";
+import { CommentEntity } from "@app/articles/comments.entity";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([ArticleEntity]),
+        TypeOrmModule.forFeature([ArticleEntity, CommentEntity]),
         UsersModule,
         ProfileModule
     ],

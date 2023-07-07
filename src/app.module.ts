@@ -4,14 +4,14 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "@app/users/users.module";
 import { JwtAuthMiddleware } from "@app/users/middlewares/jwtAuth.middleware";
 import { ArticlesModule } from "@app/articles/articles.module";
-import { ProfileModule } from './profile/profile.module';
+import { ProfileModule } from '@app/profile/profile.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeormConfig),
     UsersModule,
     ArticlesModule,
-    ProfileModule
+    ProfileModule,
   ],
   controllers: [],
   providers: []

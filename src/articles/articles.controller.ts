@@ -9,12 +9,23 @@ import { UpdateArticleDto } from "@app/articles/dto/updateArticle.dto";
 import { DeleteResult } from "typeorm";
 import { ArticlesFeedQueryDto } from "@app/articles/dto/articlesQuery.dto";
 import { ArticlesResponseInterface } from "@app/articles/interfaces/articlesResponse.interface";
+import { CreateCommentDto } from "@app/articles/dto/createComment.dto";
+import { CommentResponseInterface } from "@app/articles/interfaces/commentResponse.interface";
+import { CommentsResponseInterface } from "@app/articles/interfaces/commentsResponse.interface";
 
 @Controller("articles")
 export class ArticlesController {
     constructor(
         private readonly articlesService: ArticlesService
     ) {
+    }
+
+    @Get()
+    async getAll(
+        @Query() query: ArticlesFeedQueryDto,
+        @User("id") currentUserId: number | null
+    ): Promise<ArticlesResponseInterface> {
+        return await this.articlesService.getAll(query, currentUserId);
     }
 
     @UseGuards(JwtGuard)
@@ -80,13 +91,29 @@ export class ArticlesController {
         return this.articlesService.getArticleResponse(article);
     }
 
-    @Get()
-    async getAll(
-        @Query() query: ArticlesFeedQueryDto,
-        @User("id") currentUserId: number | null
-    ): Promise<ArticlesResponseInterface> {
-        return await this.articlesService.getAll(query, currentUserId);
+    @UseGuards(JwtGuard)
+    @Post(":slug/comments")
+    async createComment(
+        @Param("slug") slug: string,
+        @Body("comment") createCommentDto: CreateCommentDto,
+        @User() currentUser: UserEntity
+    ): Promise<CommentResponseInterface> {
+        const comment = await this.articlesService.createComment(slug, currentUser, createCommentDto);
+        return this.articlesService.getCommentResponse(comment);
     }
 
+    @UseGuards(JwtGuard)
+    @Delete(":slug/comments/:id")
+    async deleteComment(
+        @Param("id") commentId: number,
+        @User('id') currentUserId: number
+    ): Promise<DeleteResult> {
+        return await this.articlesService.deleteComment(commentId, currentUserId)
+    }
 
+    @UseGuards(JwtGuard)
+    @Get(":slug/comments")
+    async getAllComment(@Param('slug') slug: string): Promise<CommentsResponseInterface> {
+        return await this.articlesService.getAllComments(slug)
+    }
 }

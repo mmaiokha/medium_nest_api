@@ -3,6 +3,7 @@ import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, Primary
 import * as bcrypt from 'bcrypt'
 import { BCRYPT_SALT } from "@app/config/env.config";
 import { ArticleEntity } from "@app/articles/articles.entity";
+import { CommentEntity } from "@app/articles/comments.entity";
 
 @Entity({name: 'users'})
 export class UserEntity {
@@ -31,6 +32,9 @@ export class UserEntity {
 
   @OneToMany(() => ArticleEntity, (article) => article.author)
   articles: ArticleEntity[]
+
+  @OneToMany(() => CommentEntity, (comment) => comment.author)
+  comments: CommentEntity[]
 
   @ManyToMany(() => ArticleEntity)
   @JoinTable({name: 'user_favorite_articles'})
