@@ -1,15 +1,17 @@
 import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
-import typeormConfig from "@app/config/orm.config";
+import typeormConfig from "@app/config/orm/orm.config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "@app/users/users.module";
 import { JwtAuthMiddleware } from "@app/users/middlewares/jwtAuth.middleware";
 import { ArticlesModule } from "@app/articles/articles.module";
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeormConfig),
     UsersModule,
-    ArticlesModule
+    ArticlesModule,
+    ProfileModule
   ],
   controllers: [],
   providers: []
